@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+public class CameraController : NetworkBehaviour
 {
 
     public Camera mainCamera;
@@ -22,6 +23,13 @@ public class CameraController : MonoBehaviour
     bool isPaused;
     void Start()
     {
+
+        if (!IsOwner)
+        {
+            gameObject.SetActive(false);
+            return;
+
+        }
         rb = GetComponentInParent<Rigidbody>();
         curTilt = transform.localEulerAngles.z;
         Cursor.lockState = CursorLockMode.Locked;
@@ -31,11 +39,13 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
+        
         RotateMainCamera();
     }
 
     void FixedUpdate()
     {
+        if (!IsOwner) return;
         if (Input.GetKeyDown(KeyCode.Escape) && !isPaused)
         {
             Cursor.lockState = CursorLockMode.None;
@@ -61,20 +71,25 @@ public class CameraController : MonoBehaviour
 
     void RotateMainCamera()
     {
-        Vector2 mouseInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
-        mouseInput.x *= sensX;
-        mouseInput.y *= sensY;
+       if(IsLocalPlayer)
+        {
+            Vector2 mouseInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
+            mouseInput.x *= sensX;
+            mouseInput.y *= sensY;
 
-        currentLook.x += mouseInput.x;
-        currentLook.y = Mathf.Clamp(currentLook.y += mouseInput.y, -90, 90);
+            currentLook.x += mouseInput.x;
+            currentLook.y = Mathf.Clamp(currentLook.y += mouseInput.y, -90, 90);
 
-        transform.localRotation = Quaternion.AngleAxis(-currentLook.y, Vector3.right);
-        transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, curTilt);
-        transform.root.transform.localRotation = Quaternion.Euler(0, currentLook.x, 0);
+            transform.localRotation = Quaternion.AngleAxis(-currentLook.y, Vector3.right);
+            transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, curTilt);
+            transform.root.transform.localRotation = Quaternion.Euler(0, currentLook.x, 0);
+        }
+        
     }
 
     public void Punch(Vector2 dir)
     {
+       
         sway += dir;
     }
 

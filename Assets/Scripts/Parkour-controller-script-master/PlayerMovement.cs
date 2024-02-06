@@ -63,20 +63,34 @@ public class PlayerMovement : NetworkBehaviour
 
     void Start()
     {
+        if(!IsOwner) return;
+
         rb = GetComponent<Rigidbody>();
         camCon = GetComponentInChildren<CameraController>();
         col = GetComponent<CapsuleCollider>();
+        col.height = 2.032439f;
     }
 
     void OnGUI()
     {
+        if(!IsOwner) return;
         GUILayout.Label("Spid: " + new Vector3(rb.velocity.x, 0, rb.velocity.z).magnitude);
         GUILayout.Label("SpidUp: " + rb.velocity.y);
     }
-
+    //SERVER TEST
+    [ServerRpc]
+    private void TestServerRPC()
+    {
+        Debug.Log("TestServerRPC " + OwnerClientId);
+    }
     void Update()
     {
         if(!IsOwner) return;
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            TestServerRPC();
+        }
         col.material.dynamicFriction = 0f;
         dir = Direction();
 
@@ -100,6 +114,7 @@ public class PlayerMovement : NetworkBehaviour
     void FixedUpdate()
     {
         if (!IsOwner) return;
+
         if (crouched)
         {
             col.height = Mathf.Max(0.6f, col.height - Time.deltaTime * 10f);
@@ -219,6 +234,7 @@ public class PlayerMovement : NetworkBehaviour
     #region Entering States
     void EnterWalking()
     {
+        if (!IsOwner) return;
         if (mode != Mode.Walking && canJump)
         {
             if (mode == Mode.Flying && crouched)
