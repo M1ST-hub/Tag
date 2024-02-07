@@ -47,8 +47,8 @@ public class PlayerMovement : NetworkBehaviour
 
     Vector3 groundNormal = Vector3.up;
 
-    CapsuleCollider col;
-    
+    [SerializeField] CapsuleCollider col;
+
     enum Mode
     {
         Walking,
@@ -58,7 +58,7 @@ public class PlayerMovement : NetworkBehaviour
     Mode mode = Mode.Flying;
 
     CameraController camCon;
-    Rigidbody rb;
+    [SerializeField] Rigidbody rb;
     Vector3 dir = Vector3.zero;
 
     void Start()
@@ -74,8 +74,8 @@ public class PlayerMovement : NetworkBehaviour
     void OnGUI()
     {
         if(!IsOwner) return;
-        GUILayout.Label("Spid: " + new Vector3(rb.velocity.x, 0, rb.velocity.z).magnitude);
-        GUILayout.Label("SpidUp: " + rb.velocity.y);
+        GUILayout.Label("Speed: " + new Vector3(rb.velocity.x, 0, rb.velocity.z).magnitude);
+        GUILayout.Label("SpeedUp: " + rb.velocity.y);
     }
     //SERVER TEST
     [ServerRpc]
@@ -253,6 +253,7 @@ public class PlayerMovement : NetworkBehaviour
 
     void EnterFlying(bool wishFly = false)
     {
+
         grounded = false;
         if (mode == Mode.Wallruning && VectorToWall().magnitude < wallStickDistance && !wishFly)
         {
@@ -403,7 +404,7 @@ public class PlayerMovement : NetworkBehaviour
             EnterFlying();
         }
     }
-
+  
     void Jump()
     {
         if (!IsOwner) return;
